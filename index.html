@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Ficha Médica</title>
+
+<style>
+body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: #f4f6f9;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 600px;
+    margin: 40px auto;
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 15px rgba(0,0,0,0.1);
+}
+
+h2, h3 {
+    text-align: center;
+    color: #2c3e50;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 8px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    transition: 0.3s;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: #3498db;
+    outline: none;
+}
+
+.buttons {
+    text-align: center;
+}
+
+button {
+    padding: 10px 15px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    color: white;
+    transition: 0.3s;
+}
+
+.btn-guardar { background: #27ae60; }
+.btn-guardar:hover { background: #219150; }
+
+.btn-limpiar { background: #f39c12; }
+.btn-limpiar:hover { background: #d68910; }
+
+.btn-cerrar { background: #e74c3c; }
+.btn-cerrar:hover { background: #c0392b; }
+
+.btn-buscar {
+    background: #3498db;
+    width: 100%;
+}
+.btn-buscar:hover {
+    background: #2c80b4;
+}
+
+#resultados {
+    margin-top: 15px;
+    padding: 10px;
+    background: #ecf0f1;
+    border-radius: 5px;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Ficha Médica</h2>
+
+<form id="formulario">
+
+<input type="text" id="rut" placeholder="Rut" required>
+<input type="text" id="nombres" placeholder="Nombres" required>
+<input type="text" id="apellidos" placeholder="Apellidos" required>
+<input type="text" id="direccion" placeholder="Dirección" required>
+<input type="text" id="ciudad" placeholder="Ciudad" required>
+<input type="text" id="telefono" placeholder="Teléfono" required>
+<input type="email" id="email" placeholder="Email" required>
+<input type="date" id="fecha" required>
+
+<select id="estado">
+    <option value="">Estado Civil</option>
+    <option>Soltero</option>
+    <option>Casado</option>
+    <option>Divorciado</option>
+</select>
+
+<textarea id="comentarios" placeholder="Comentarios"></textarea>
+
+<div class="buttons">
+<button type="button" class="btn-guardar" onclick="guardar()">Guardar</button>
+<button type="button" class="btn-limpiar" onclick="limpiar()">Limpiar</button>
+<button type="button" class="btn-cerrar" onclick="cerrarApp()">Cerrar</button>
+</div>
+
+</form>
+
+<h3>Buscar por apellido</h3>
+<input type="text" id="buscarApellido" placeholder="Ingrese apellido">
+<button class="btn-buscar" onclick="buscar()">Buscar</button>
+
+<div id="resultados"></div>
+
+</div>
+
+<script>
+
+let registros = JSON.parse(localStorage.getItem("pacientes")) || [];
+
+function validar() {
+    let rut = document.getElementById("rut").value;
+    let email = document.getElementById("email").value;
+    let telefono = document.getElementById("telefono").value;
+
+    if (!rut) {
+        alert("El RUT es obligatorio");
+        return false;
+    }
+
+    if (!email.includes("@")) {
+        alert("Email inválido");
+        return false;
+    }
+
+    if (isNaN(telefono)) {
+        alert("El teléfono debe ser numérico");
+        return false;
+    }
+
+    return true;
+}
+
+function guardar() {
+
+    if (!validar()) return;
+
+    let rut = document.getElementById("rut").value;
+
+    let existe = registros.find(r => r.rut === rut);
+
+    if (existe) {
+        let confirmar = confirm("El registro ya existe. ¿Desea sobrescribir?");
+        if (!confirmar) return;
+
+        registros = registros.filter(r => r.rut !== rut);
+    }
+
+    let paciente = {
+        rut: rut,
+        nombres: document.getElementById("nombres").value,
+        apellidos: document.getElementById("apellidos").value,
+        direccion: document.getElementById("direccion").value,
+        ciudad: document.getElementById("ciudad").value,
+        telefono: document.getElementById("telefono").value,
+        email: document.getElementById("email").value,
+        fecha: document.getElementById("fecha").value,
+        estado: document.getElementById("estado").value,
+        comentarios: document.getElementById("comentarios").value
+    };
+
+    registros.push(paciente);
+    localStorage.setItem("pacientes", JSON.stringify(registros));
+
+    alert("Registro guardado correctamente");
+    limpiar();
+}
+
+function limpiar() {
+    document.getElementById("formulario").reset();
+}
+
+function cerrarApp() {
+    alert("Aplicación cerrada");
+}
+
+function buscar() {
+    let apellido = document.getElementById("buscarApellido").value.toLowerCase();
+
+    let resultados = registros.filter(r => r.apellidos.toLowerCase().includes(apellido));
+
+    let html = "<h4>Resultados:</h4>";
+
+    if (resultados.length === 0) {
+        html += "<p><b>No se encontraron registros para el apellido ingresado.</b></p>";
+    } else {
+        resultados.forEach(r => {
+            html += `<p>${r.nombres} ${r.apellidos} - ${r.rut}</p>`;
+        });
+    }
+
+    document.getElementById("resultados").innerHTML = html;
+}
+
+</script>
+
+</body>
+</html>
