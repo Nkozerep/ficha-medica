@@ -191,7 +191,9 @@ function limpiar() {
 }
 
 function cerrarApp() {
-    alert("Aplicación cerrada");
+    if (confirm("¿Desea salir de la aplicación?")) {
+        window.location.href = "about:blank";
+    }
 }
 
 function buscar() {
